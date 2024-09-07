@@ -1,0 +1,86 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+    <div class="container">
+
+        <a href="/home" style="position: fixed; top: 10px; left: 10px;">
+    <img src="https://media.istockphoto.com/id/1312128591/vector/home-icon-vector-house-sign.jpg?s=612x612&w=0&k=20&c=jxUT546g8Cfgv1SiAfh2Eos46XI3DqYvPLhxGFaobpE=" alt="Home" width="30" height="30">
+</a>
+ {{#if msg}}
+<div class="alert">{{msg}}</div>
+{{/if}}
+        <h2>Transaction Page</h2>
+        <form id="transactionForm" method="post" action="/transaction">
+            <label for="accountNumber">Account Number:</label>
+            <input type="text" id="accountNumber" name="account_number" placeholder="Your Account Number" required autocomplete="off"><br>
+            <div id="suggestions"></div>
+
+           <style>
+    #suggestions {
+        display: none; /* Initially hide the suggestions */
+        /* Other styles remain the same */
+    }
+</style>
+
+<script>
+    const accountNumberInput = document.getElementById('accountNumber');
+    const suggestionsContainer = document.getElementById('suggestions');
+
+    accountNumberInput.addEventListener('input', function() {
+        const userInput = this.value;
+
+        // Clear previous suggestions
+        suggestionsContainer.innerHTML = '';
+
+        if (userInput.trim() !== '') { // Show suggestions only if input is not empty
+            // Send AJAX request to fetch suggestions
+            fetch('/suggestions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ account_number: userInput })
+            }).then(response => response.json())
+            .then(data => {
+                // Update suggestions area with fetched suggestions
+                data.forEach(suggestion => {
+                    const suggestionElement = document.createElement('div');
+                    suggestionElement.textContent = suggestion.account_number + ' - ' + suggestion.customer_name;
+                    suggestionElement.classList.add('suggestion-item'); // Add a class for styling
+                    suggestionElement.addEventListener('click', function() {
+                        // Update input value when suggestion is clicked
+                        accountNumberInput.value = suggestion.account_number;
+                        // Hide suggestions container
+                        suggestionsContainer.style.display = 'none';
+                    });
+                    suggestionsContainer.appendChild(suggestionElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching suggestions:', error);
+            });
+
+            // Display the suggestions container
+            suggestionsContainer.style.display = 'block';
+        } else {
+            // Hide the suggestions container if input is empty
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+</script>
+
+
+
+            <label>Transaction Type:</label><br>
+            <input type="radio" id="credit" name="type" value="credit" required><label for="credit">Credit</label><br>
+            <input type="radio" id="debit" name="type" value="debit"><label for="debit">Debit</label><br>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" placeholder="Amount" required autocomplete="off"><br>
+
+            <label for="pass">Password:</label>
+            <input type="text" id="pass" name="password" autocomplete="off"><br>
+
+            <button type="submit">Proceed</button>
+            <button type="reset">Cancel</button>
+        </form>
+    </div>
